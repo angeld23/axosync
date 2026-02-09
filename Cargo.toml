@@ -1,0 +1,18 @@
+[package]
+name = "axosync"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+actix-web = "4.12.1"
+anyhow = "1.0.101"
+camino = { version = "1.2.2", features = ["serde1"] }
+clap = { version = "4.5.57", features = ["derive"] }
+colored = "3.1.1"
+dialoguer = "0.12.0"
+env_logger = "0.11.8"
+log = "0.4.29"
+serde = { version = "1.0.228", features = ["alloc", "derive"] }
+serde_json = { version = "1.0.149", features = ["alloc"] }
+toml = "0.9.8"
+walkdir = "2.5.0"

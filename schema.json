@@ -1,0 +1,34 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Config",
+    "type": "object",
+    "properties": {
+        "config": {
+            "type": "object",
+            "description": "Configuration settings",
+            "properties": {
+                "project_name": {
+                    "type": "string",
+                    "description": "The name of the project"
+                },
+                "port": {
+                    "type": "integer",
+                    "description": "Port to run the server on"
+                },
+                "sourcemap_directory": {
+                    "type": "string",
+                    "description": "Directory to place `sourcemap.json`"
+                },
+                "file_paths_scrape_directory": {
+                    "type": "string",
+                    "description": "Directory to scrape for file paths"
+                },
+                "log_level": {
+                    "type": "string",
+                    "description": "Minimum log level to output",
+                    "enum": ["trace", "debug", "info", "warn", "error"]
+                }
+            }
+        }
+    }
+}

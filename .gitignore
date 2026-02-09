@@ -1,0 +1,5 @@
+/target
+/justfile
+/sourcemap.json
+/.luaurc
+/axosync.toml
