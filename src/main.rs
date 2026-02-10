@@ -194,52 +194,50 @@ pub struct SourcemapSetRequest {
 }
 
 #[post("/sourcemapSet")]
-async fn sourcemap_set(req: web::Json<SourcemapSetRequest>) -> actix_web::Result<()> {
-    let req = req.into_inner();
+async fn sourcemap_set(requests: web::Json<Vec<SourcemapSetRequest>>) -> actix_web::Result<()> {
+    let requests = requests.into_inner();
 
-    if req.path.is_empty() {
-        req.value
-            .ok_or_else(|| {
+    let mut top = SourcemapInstance::load().unwrap();
+    for req in requests {
+        if req.path.is_empty() {
+            top = req.value.ok_or_else(|| {
                 actix_web::error::ErrorBadRequest(anyhow!(
                     "Path cannot be empty when setting top-level value"
                 ))
-            })?
-            .save()
-            .unwrap();
+            })?;
 
-        return Ok(());
-    }
-
-    let mut top = SourcemapInstance::load().unwrap();
-    let mut current = &mut top;
-    for name in req.path.iter().take(req.path.len().saturating_sub(1)) {
-        let current_class_name = current.class_name.clone();
-        let current_name = current.name.clone();
-        current = current.find_first_child_mut(name).ok_or_else(|| {
-            actix_web::error::ErrorBadRequest(anyhow!(
-                "\"{}\" is not a valid member of {} {}",
-                name,
-                current_class_name,
-                current_name
-            ))
-        })?;
-    }
-
-    if let Some(mut value) = req.value {
-        if let Some(name) = req.path.last()
-            && let Some(child) = current.find_first_child_mut(name)
-        {
-            if req.no_overwrite_children {
-                value.children = child.children.clone();
-            }
-            *child = value;
-        } else {
-            current.children.push(value);
+            continue;
         }
-    } else if let Some(name) = req.path.last() {
-        current.children.retain(|child| &child.name != name);
-    }
 
+        let mut current = &mut top;
+        for name in req.path.iter().take(req.path.len().saturating_sub(1)) {
+            let current_class_name = current.class_name.clone();
+            let current_name = current.name.clone();
+            current = current.find_first_child_mut(name).ok_or_else(|| {
+                actix_web::error::ErrorBadRequest(anyhow!(
+                    "\"{}\" is not a valid member of {} {}",
+                    name,
+                    current_class_name,
+                    current_name
+                ))
+            })?;
+        }
+
+        if let Some(mut value) = req.value {
+            if let Some(name) = req.path.last()
+                && let Some(child) = current.find_first_child_mut(name)
+            {
+                if req.no_overwrite_children {
+                    value.children = child.children.clone();
+                }
+                *child = value;
+            } else {
+                current.children.push(value);
+            }
+        } else if let Some(name) = req.path.last() {
+            current.children.retain(|child| &child.name != name);
+        }
+    }
     top.save().unwrap();
 
     Ok(())
